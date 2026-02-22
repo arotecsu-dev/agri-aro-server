@@ -1,8 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
-import { culturasParams } from "../data/fieldsParams";
-import { verifyField, getUserData } from "../firebase";
+import { culturasParams } from "../data/params";
 import { generateAlertEmail } from "../templates/emails";
-import { inInterval } from "../utils";
+import { inInterval } from "./date";
 import { sendMail } from "./emails";
 
 async function verifySensParms(field_id, data) {

@@ -2,10 +2,11 @@
 import type { Express } from "express";
 import { jwtService } from "../auth/jwt";
 import type { Server as HttpServer } from "node:http";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
+import { Device } from "../database/models/device";
 
 export class SocketService {
-  public sockets: Record<string, any[]> = {};
+  sockets: Record<string, Socket[]> = {};
 
   constructor(server: HttpServer, corsConfig: any) {
     const io = new Server(server, {
@@ -13,7 +14,7 @@ export class SocketService {
     });
 
     io.on("connection", async (socket) => {
-      const { token, device_id } = socket.handshake.query;
+      const { token, deviceId } = socket.handshake.query;
 
       socket.emit;
       if (!token) {
@@ -28,16 +29,16 @@ export class SocketService {
         return;
       }
 
-      //const device = await verifyDevice(device_id);
+      const device = await Device.findById(deviceId);
 
-      //if (device == null) {
-      // socket.disconnect();
-      // return;
-      //}
+      if (device == null) {
+        socket.disconnect();
+        return;
+      }
 
       socket.on("disconnect", function () {
         for (var _dev in this.sockets) {
-          if (device_id == _dev) {
+          if (deviceId == _dev) {
             this.sockets[_dev] = this.sockets[_dev].filter((_socket) => {
               if (_socket.id == socket.id) {
                 return false;
@@ -49,13 +50,13 @@ export class SocketService {
       });
       //adicionar os emits
 
-      if (device_id in this.sockets) {
-        this.sockets[device_id].push({
+      if (deviceId in this.sockets) {
+        this.sockets[deviceId].push({
           socket: socket,
           id: socket.id,
         });
       } else {
-        this.sockets[device_id] = [
+        this.sockets[deviceId] = [
           {
             socket: socket,
             id: socket.id,

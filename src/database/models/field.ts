@@ -3,9 +3,21 @@ import mongoose, { Schema } from "mongoose";
 const fieldSchema = new Schema(
   {
     fieldName: { type: String, required: true },
-    userId: { type: String, required: true },
-    cropType: { type: String, required: true },
-    soilType: { type: String, required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    cropType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Crop",
+      required: true,
+    },
+    soilType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Soil",
+      required: true,
+    },
     fieldSize: { type: String, sparse: true },
     address: { type: String, required: true },
     position: {
