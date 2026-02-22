@@ -20,7 +20,9 @@ export class AuthController {
     const userCreated = await user.save();
 
     res.json({
-      accessToken: jwtService.generateToken({ id: userCreated._id.toString() }),
+      accessToken: jwtService.generateToken({
+        userId: userCreated._id.toString(),
+      }),
       user: userCreated,
     });
   }
@@ -34,7 +36,7 @@ export class AuthController {
       return res.sendStatus(401);
 
     res.json({
-      accessToken: jwtService.generateToken({ id: user._id.toString() }),
+      accessToken: jwtService.generateToken({ userId: user._id.toString() }),
       user,
     });
   }

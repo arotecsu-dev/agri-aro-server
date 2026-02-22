@@ -1,6 +1,8 @@
 import type { Express, Request, Response } from "express";
 import { loggerMiddleware } from "../middleware/logger.middleware";
 import { authRouter } from "./auth.route";
+import { profileRouter } from "./profile.route";
+import { authMiddleware } from "../middleware/auth.middleware";
 
 export function loadRoutes(app: Express) {
   app.use(loggerMiddleware);
@@ -11,19 +13,13 @@ export function loadRoutes(app: Express) {
   });
 
   app.use("/auth", authRouter);
+  app.use("/profile", authMiddleware.use, profileRouter);
 
   /*
-  app.use("/", usersRouter);
   app.use("/devices", devicesRouter);
   app.use("/fields", fieldsRouter);
   app.use("/sensor-readings", sensorsRouter);
 
-  app.post("/login", LoginUserRoute);
-  app.get("/users/verify", authMiddleware, VerifyUserRoute);
-  app.post("/users", CreateUserRoute);
-  app.get("/users/data", authMiddleware, UserDataRoute);
-  app.get("/users/custom-token", authMiddleware, CustomTokenUserRoute);
-  app.post("/users/update/password", authMiddleware, UpdatePasswordRoute);
 
   app.get("/params/fields", authMiddleware, GetFieldsParamsRoute);
 
