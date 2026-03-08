@@ -1,11 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config();
 import mongoose from "mongoose";
 import { cropsData, soilData, devicesData } from "./data/seedData";
 
 // Registrar todos os modelos
 import { Crop, Soil, Device, SoilCrop } from "../src/database/models";
 
-const MONGODB_URI =
-  process.env.DATABASE_URL || "mongodb://localhost:27017/agri-aro";
+const MONGODB_URI = process.env.DATABASE_URL!;
 
 async function seedCrops() {
   console.log("🌱 Seeding crops...");
