@@ -39,7 +39,7 @@ function generateReportEmail({
 </head>
 <body>
     <div class="d-flex gap items-center">
-        <img src="https://api-agriaro.arotec.ao/assets/seed_green.png" width="30" alt="">
+        <img src="https://api-agriaro.arotec.ao/assets/icons/seed_green.png" width="30" alt="">
        <strong> AGRI-ARO</strong>
     </div>
 
@@ -123,7 +123,7 @@ function generateAlertEmail({ name, date, alertas }: GenerateAlertEmailParams) {
 </head>
 <body>
     <div class="d-flex gap items-center">
-        <img src="https://api-agriaro.arotec.ao/assets/seed_green.png" width="30" alt="">
+        <img src="https://api-agriaro.arotec.ao/assets/icons/seed_green.png" width="30" alt="">
        <strong> AGRI-ARO</strong>
     </div>
 
