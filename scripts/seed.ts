@@ -119,7 +119,6 @@ async function seedSoilCrop() {
               maxValue: specs.potassium.max,
             },
           ],
-          isRecommended: true,
         });
       });
     });

@@ -20,8 +20,6 @@ const SoilCropSchema = new Schema(
         maxValue: Number,
       },
     ],
-
-    isRecommended: { type: Boolean, default: true },
   },
   { timestamps: true },
 );

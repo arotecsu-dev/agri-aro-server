@@ -185,7 +185,9 @@ class FieldsController {
     const params = await SoilCrop.findOne({
       crop: field.cropType.toString(),
       soil: field.soilType.toString(),
-    });
+    })
+      .populate("crop")
+      .populate("soil");
 
     if (!params) return res.sendStatus(404);
 
