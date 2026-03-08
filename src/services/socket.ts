@@ -68,14 +68,12 @@ export class SocketService {
           if (device._id.toString() == _dev) {
             const socketArray = this.sockets[_dev];
             if (socketArray) {
-              this.sockets[_dev] = socketArray.filter(
-                (_socket: SocketInfo) => {
-                  if (_socket.socketId == socket.id) {
-                    return false;
-                  }
-                  return true;
-                },
-              );
+              this.sockets[_dev] = socketArray.filter((_socket: SocketInfo) => {
+                if (_socket.socketId == socket.id) {
+                  return false;
+                }
+                return true;
+              });
             }
           }
         }
