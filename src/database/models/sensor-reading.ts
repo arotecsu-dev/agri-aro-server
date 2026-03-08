@@ -2,7 +2,11 @@ import mongoose, { Schema, Document } from "mongoose";
 
 const sensorReadingSchema = new Schema(
   {
-    deviceId: { type: String, required: true },
+    deviceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Device",
+      required: false,
+    },
     moment: { type: Date, required: true, default: Date.now },
     phosphorus: { type: Number, required: true, default: 0 },
     nitrogen: { type: Number, required: true, default: 0 },

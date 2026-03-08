@@ -18,9 +18,10 @@ export class SocketService {
       cors: corsConfig,
     });
 
-    io.on("connection", async (socket) => {
-      const { token, fieldId }: { token: string; fieldId: string } =
-        socket.handshake.query;
+    io.on("connection", async (socket: Socket) => {
+      const handshakeQuery = socket.handshake.query;
+      const token = (handshakeQuery.token || "") as string;
+      const fieldId = (handshakeQuery.fieldId || "") as string;
 
       if (!token) {
         socket.disconnect();
@@ -62,15 +63,20 @@ export class SocketService {
         ];
       }
 
-      socket.on("disconnect", function () {
+      socket.on("disconnect", (): void => {
         for (const _dev in this.sockets) {
           if (device._id.toString() == _dev) {
-            this.sockets[_dev] = this.sockets[_dev].filter((_socket) => {
-              if (_socket.socketId == socket.id) {
-                return false;
-              }
-              return true;
-            });
+            const socketArray = this.sockets[_dev];
+            if (socketArray) {
+              this.sockets[_dev] = socketArray.filter(
+                (_socket: SocketInfo) => {
+                  if (_socket.socketId == socket.id) {
+                    return false;
+                  }
+                  return true;
+                },
+              );
+            }
           }
         }
       });

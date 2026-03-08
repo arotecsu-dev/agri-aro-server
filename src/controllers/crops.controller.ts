@@ -2,14 +2,15 @@ import type { Request, Response } from "express";
 import { Crop } from "../database/models";
 
 class CropsController {
-  async getCrops(req: Request, res: Response) {
+  getCrops = async (req: Request, res: Response): Promise<void> => {
     try {
       const crops = await Crop.find();
 
       if (!crops || crops.length === 0) {
-        return res.status(200).json({
+        res.status(200).json({
           crops: [],
         });
+        return;
       }
 
       res.json({
@@ -20,7 +21,7 @@ class CropsController {
         message: "Error fetching crops",
       });
     }
-  }
+  };
 }
 
 export const cropsController = new CropsController();

@@ -1,14 +1,19 @@
 import type { Request, Response } from "express";
+import { Types } from "mongoose";
 import { User } from "../database/models/user";
 import type { AuthRequest } from "../middleware/auth.middleware";
 import { Device } from "../database/models/device";
 import { Field, SoilCrop } from "../database/models";
+
 class FieldsController {
-  async getAll(req: AuthRequest, res: Response) {
+  getAll = async (req: AuthRequest, res: Response): Promise<void> => {
     const { userId } = req;
 
     const user = await User.findById(userId);
-    if (!user) return res.sendStatus(401);
+    if (!user) {
+      res.sendStatus(401);
+      return;
+    }
 
     const ownFields = await Field.find({ userId })
       .populate("cropType")
@@ -23,9 +28,9 @@ class FieldsController {
     res.json({
       fields: allFields,
     });
-  }
+  };
 
-  async create(req: AuthRequest, res: Response) {
+  create = async (req: AuthRequest, res: Response): Promise<void> => {
     const { userId } = req;
 
     const {
@@ -38,7 +43,10 @@ class FieldsController {
       fieldSize,
     } = req.body;
     const user = await User.findById(userId);
-    if (!user) return res.status(404);
+    if (!user) {
+      res.status(404).end();
+      return;
+    }
 
     const field = await Field.create({
       fieldName,
@@ -51,8 +59,8 @@ class FieldsController {
       associates: [],
     });
 
-    if (deviceId) {
-      const device = await Device.findOne({ deviceId });
+    if (deviceId && typeof deviceId === "string") {
+      const device = await Device.findOne({ serieId: deviceId });
       if (device) {
         device.userId = userId;
         device.fieldId = field._id;
@@ -67,26 +75,29 @@ class FieldsController {
     res.status(201).json({
       field: populated,
     });
-  }
+  };
 
-  async getById(req: AuthRequest, res: Response) {
-    const { fieldId } = req.params;
+  getById = async (req: AuthRequest, res: Response): Promise<void> => {
+    const fieldId = req.params.fieldId as string;
 
     const field = await Field.findById(fieldId)
       .populate("cropType")
       .populate("soilType");
 
-    if (!field) return res.status(404);
+    if (!field) {
+      res.status(404).end();
+      return;
+    }
 
-    const devices = await Device.find({ fieldId });
+    const devices = await Device.find({ fieldId: new Types.ObjectId(fieldId) });
 
     res.json({
       field,
       devices,
     });
-  }
+  };
 
-  async update(req: AuthRequest, res: Response) {
+  update = async (req: AuthRequest, res: Response): Promise<void> => {
     const { fieldId } = req.params;
     const { fieldName, cropType, soilType, address, position, fieldSize } =
       req.body;
@@ -107,45 +118,57 @@ class FieldsController {
       .populate("soilType");
 
     if (!field) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Campo não encontrado",
       });
+      return;
     }
 
     res.json({
       field,
     });
-  }
+  };
 
-  async delete(req: AuthRequest, res: Response) {
-    const { fieldId } = req.params;
+  delete = async (req: AuthRequest, res: Response): Promise<void> => {
+    const fieldId = req.params.fieldId as string;
 
     const field = await Field.findByIdAndDelete(fieldId);
 
-    if (!field) return res.status(404);
+    if (!field) {
+      res.status(404).end();
+      return;
+    }
 
     // Desassociar dispositivo
-    const device = await Device.findOne({ fieldId });
+    const device = await Device.findOne({
+      fieldId: new Types.ObjectId(fieldId),
+    });
     if (device) {
-      device.userId = undefined;
-      device.fieldId = undefined;
+      device.userId = null;
+      device.fieldId = null;
       await device.save();
     }
 
     res.sendStatus(200);
-  }
+  };
 
-  async addAssociate(req: AuthRequest, res: Response) {
+  addAssociate = async (req: AuthRequest, res: Response): Promise<void> => {
     const { fieldId } = req.params;
     const { email } = req.body;
 
     const field = await Field.findById(fieldId);
 
-    if (!field) return res.status(404);
+    if (!field) {
+      res.status(404).end();
+      return;
+    }
 
     // Verificar se já é associado
-    if (field.associates.includes(email)) return res.status(400);
+    if (field.associates.includes(email)) {
+      res.status(400).end();
+      return;
+    }
 
     field.associates.push(email);
     await field.save();
@@ -157,14 +180,17 @@ class FieldsController {
     res.json({
       field: populated,
     });
-  }
+  };
 
-  async removeAssociate(req: AuthRequest, res: Response) {
+  removeAssociate = async (req: AuthRequest, res: Response): Promise<void> => {
     const { fieldId, email } = req.params;
 
     const field = await Field.findById(fieldId);
 
-    if (!field) return res.status(404);
+    if (!field) {
+      res.status(404).end();
+      return;
+    }
 
     field.associates = field.associates.filter((e: string) => e !== email);
     await field.save();
@@ -176,13 +202,16 @@ class FieldsController {
     res.json({
       field: populated,
     });
-  }
+  };
 
-  async getParams(req: AuthRequest, res: Response) {
+  getParams = async (req: AuthRequest, res: Response): Promise<void> => {
     const { fieldId } = req.params;
 
     const field = await Field.findById(fieldId);
-    if (!field) return res.sendStatus(404);
+    if (!field) {
+      res.sendStatus(404);
+      return;
+    }
 
     const params = await SoilCrop.findOne({
       crop: field.cropType.toString(),
@@ -191,40 +220,46 @@ class FieldsController {
       .populate("crop")
       .populate("soil");
 
-    if (!params) return res.sendStatus(404);
+    if (!params) {
+      res.sendStatus(404);
+      return;
+    }
 
     res.json({
       params,
     });
-  }
+  };
 
-  async addDevice(req: AuthRequest, res: Response) {
-    const { fieldId } = req.params;
+  addDevice = async (req: AuthRequest, res: Response): Promise<void> => {
+    const fieldId = req.params.fieldId as string;
     const { serieId } = req.body;
     const { userId } = req;
 
     const field = await Field.findById(fieldId);
-    if (!field)
-      return res.status(404).json({ message: "Campo não encontrado" });
+    if (!field) {
+      res.status(404).json({ message: "Campo não encontrado" });
+      return;
+    }
 
     // Verificar se o device existe
     const device = await Device.findOne({ serieId });
     if (!device) {
-      return res.status(404).json({ message: "Dispositivo não encontrado" });
+      res.status(404).json({ message: "Dispositivo não encontrado" });
+      return;
     }
 
     // Associar device ao field
-    device.fieldId = fieldId;
+    device.fieldId = new Types.ObjectId(fieldId);
     device.userId = userId;
     await device.save();
 
-    const devices = await Device.find({ fieldId });
+    const devices = await Device.find({ fieldId: new Types.ObjectId(fieldId) });
 
     res.json({
       field,
       devices,
     });
-  }
+  };
 }
 
 export const fieldsController = new FieldsController();

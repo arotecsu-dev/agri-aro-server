@@ -17,9 +17,21 @@ export function loadRoutes(app: Express) {
   });
 
   app.use("/auth", authRouter);
-  app.use("/profile", authMiddleware.use, profileRouter);
-  app.use("/fields", authMiddleware.use, fieldsRouter);
-  app.use("/devices", authMiddleware.use, devicesRouter);
+  app.use(
+    "/profile",
+    (req, res, next) => authMiddleware.use(req as any, res, next),
+    profileRouter,
+  );
+  app.use(
+    "/fields",
+    (req, res, next) => authMiddleware.use(req as any, res, next),
+    fieldsRouter,
+  );
+  app.use(
+    "/devices",
+    (req, res, next) => authMiddleware.use(req as any, res, next),
+    devicesRouter,
+  );
   app.use("/soils", soilsRouter);
   app.use("/crops", cropsRouter);
 }

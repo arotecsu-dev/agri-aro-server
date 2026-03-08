@@ -4,30 +4,38 @@ import type { AuthRequest } from "../middleware/auth.middleware";
 import { passwordService } from "../auth/password";
 
 class ProfileController {
-  async profile(req: AuthRequest, res: Response) {
+  profile = async (req: AuthRequest, res: Response): Promise<void> => {
     const { userId } = req;
 
     const user = await User.findById(userId);
-    if (!user) return res.sendStatus(404);
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
 
     res.json({ user });
-  }
+  };
 
-  async changePassword(req: AuthRequest, res: Response) {
+  changePassword = async (req: AuthRequest, res: Response): Promise<void> => {
     const { userId } = req;
     const { currentPassword, newPassword } = req.body;
 
     const user = await User.findById(userId);
-    if (!user) return res.sendStatus(404);
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
 
-    if (!passwordService.compare(currentPassword, user.password))
-      return res.sendStatus(401);
+    if (!passwordService.compare(currentPassword, user.password)) {
+      res.sendStatus(401);
+      return;
+    }
 
     user.password = passwordService.hash(newPassword);
     await user.save();
 
     res.sendStatus(200);
-  }
+  };
 }
 
 export const profileController = new ProfileController();

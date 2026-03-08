@@ -4,11 +4,14 @@ import { passwordService } from "../auth/password";
 import { jwtService } from "../auth/jwt";
 
 export class AuthController {
-  async register(req: Request, res: Response) {
+  register = async (req: Request, res: Response): Promise<void> => {
     const { name, email, phone, password } = req.body;
 
     const exists = await User.findOne({ email });
-    if (exists) return res.sendStatus(409);
+    if (exists) {
+      res.sendStatus(409);
+      return;
+    }
 
     const user = new User({
       name,
@@ -25,27 +28,35 @@ export class AuthController {
       }),
       user: userCreated,
     });
-  }
+  };
 
-  async login(req: Request, res: Response) {
+  login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.sendStatus(404);
-    if (!passwordService.compare(password, user.password))
-      return res.sendStatus(401);
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
+    if (!passwordService.compare(password, user.password)) {
+      res.sendStatus(401);
+      return;
+    }
 
     res.json({
       accessToken: jwtService.generateToken({ userId: user._id.toString() }),
       user,
     });
-  }
+  };
 
-  async forgotPassword(req: Request, res: Response) {
+  forgotPassword = async (req: Request, res: Response): Promise<void> => {
     const { email } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) return res.sendStatus(404);
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
 
     const resetToken = passwordService.generateResetToken();
     const resetPasswordExpires = new Date();
@@ -56,9 +67,9 @@ export class AuthController {
 
     await user.save();
     res.sendStatus(200);
-  }
+  };
 
-  async verifyResetToken(req: Request, res: Response) {
+  verifyResetToken = async (req: Request, res: Response): Promise<void> => {
     const { token } = req.body;
 
     const user = await User.findOne({
@@ -66,11 +77,14 @@ export class AuthController {
       resetPasswordExpires: { $gt: new Date() },
     });
 
-    if (!user) return res.sendStatus(404);
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
     res.sendStatus(200);
-  }
+  };
 
-  async resetPassword(req: Request, res: Response) {
+  resetPassword = async (req: Request, res: Response): Promise<void> => {
     const { token, newPassword } = req.body;
 
     const user = await User.findOne({
@@ -78,7 +92,10 @@ export class AuthController {
       resetPasswordExpires: { $gt: new Date() },
     });
 
-    if (!user) return res.sendStatus(404);
+    if (!user) {
+      res.sendStatus(404);
+      return;
+    }
 
     user.password = passwordService.hash(newPassword);
     user.resetPasswordToken = null;
@@ -86,7 +103,7 @@ export class AuthController {
 
     await user.save();
     res.sendStatus(200);
-  }
+  };
 }
 
 export const authController = new AuthController();

@@ -2,14 +2,15 @@ import type { Request, Response } from "express";
 import { Soil } from "../database/models";
 
 class SoilsController {
-  async getSoils(req: Request, res: Response) {
+  getSoils = async (req: Request, res: Response): Promise<void> => {
     try {
       const soils = await Soil.find();
 
       if (!soils || soils.length === 0) {
-        return res.status(200).json({
+        res.status(200).json({
           soils: [],
         });
+        return;
       }
 
       res.json({
@@ -20,7 +21,7 @@ class SoilsController {
         message: "Error fetching soils",
       });
     }
-  }
+  };
 }
 
 export const soilsController = new SoilsController();

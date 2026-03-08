@@ -1,4 +1,4 @@
-function getDateExtensive(date) {
+function getDateExtensive(date: Date): string {
   let extensive = "";
   extensive += date.getDate() + " de ";
 
@@ -46,7 +46,7 @@ function getDateExtensive(date) {
   return extensive;
 }
 
-function dateToString(date, type = "") {
+function dateToString(date: Date, type: string = ""): string {
   if (date == null) return "";
   let year = date.getFullYear().toString();
   let month = (date.getMonth() + 1).toString();
@@ -60,9 +60,10 @@ function dateToString(date, type = "") {
   } else if (type == "pt") {
     return `${day}/${month}/${year}`;
   }
+  return `${year}-${month}-${day}`;
 }
 
-function inInterval(value, interval) {
+function inInterval(value: number, interval: any): boolean {
   if (interval == undefined) {
     return true;
   }

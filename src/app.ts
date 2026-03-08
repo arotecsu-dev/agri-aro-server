@@ -26,9 +26,7 @@ app.use(express.static("public"));
 
 loadRoutes(app);
 
-const server = createServer(app, {
-  cors: corsConfig,
-});
+const server = createServer(app);
 
 const socketService = new SocketService(server, corsConfig);
 

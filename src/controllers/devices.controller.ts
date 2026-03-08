@@ -4,39 +4,54 @@ import { Device } from "../database/models/device";
 import { SensorReading } from "../database/models/sensor-reading";
 
 class DevicesController {
-  async get(req: AuthRequest, res: Response) {
-    const { deviceId } = req.params;
+  get = async (req: AuthRequest, res: Response): Promise<void> => {
+    const deviceId = req.params.deviceId as string;
 
-    const device = await Device.findOne({ deviceId });
-    if (!device) return res.sendStatus(404);
+    const device = await Device.findById(deviceId);
+    if (!device) {
+      res.sendStatus(404);
+      return;
+    }
 
     res.json({ device });
-  }
+  };
 
-  async getSensData(req: AuthRequest, res: Response) {
-    const { deviceId } = req.params;
+  getSensData = async (req: AuthRequest, res: Response): Promise<void> => {
+    const deviceId = req.params.deviceId as string;
 
-    const device = await Device.findOne({ deviceId });
-    if (!device) return res.sendStatus(404);
+    const device = await Device.findById(deviceId);
+    if (!device) {
+      res.sendStatus(404);
+      return;
+    }
 
-    const { minDate, maxDate } = req.query;
+    const minDate = req.query.minDate as string | undefined;
+    const maxDate = req.query.maxDate as string | undefined;
+
+    if (!minDate || !maxDate) {
+      res.status(400).json({ error: "minDate and maxDate are required" });
+      return;
+    }
 
     const readings = await SensorReading.find({
-      deviceId: deviceId,
+      deviceId,
       moment: {
-        $gte: new Date(minDate as string),
-        $lte: new Date(maxDate as string),
+        $gte: new Date(minDate),
+        $lte: new Date(maxDate),
       },
     });
 
     res.json({ readings });
-  }
+  };
 
-  async sendData(req: AuthRequest, res: Response) {
-    const { deviceId } = req.params;
+  sendData = async (req: AuthRequest, res: Response): Promise<void> => {
+    const deviceId = req.params.deviceId as string;
 
-    const device = await Device.findOne({ deviceId });
-    if (!device) return res.sendStatus(404);
+    const device = await Device.findOne({ serieId: deviceId });
+    if (!device) {
+      res.sendStatus(404);
+      return;
+    }
 
     const {
       phosphorus,
@@ -48,8 +63,8 @@ class DevicesController {
       soilMoisture,
     } = req.body;
 
-    const newReading = SensorReading.create({
-      deviceId,
+    const newReading = await SensorReading.create({
+      deviceId: device._id,
       phosphorus,
       nitrogen,
       ph,
@@ -62,7 +77,7 @@ class DevicesController {
     res.json({
       data: newReading,
     });
-  }
+  };
 }
 
 export const devicesController = new DevicesController();

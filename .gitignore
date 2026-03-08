@@ -3,3 +3,4 @@ package-lock.json
 .env*
 agri-aro-key-firebase.json
 bun.lock
+dist
