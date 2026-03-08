@@ -12,12 +12,14 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendMail(toEmail: string, subject: string, bodyEmail: string) {
-  await transporter.sendMail({
+  const info = await transporter.sendMail({
     from: `Agri Aro <${envService.get("EMAIL_FROM")}>`,
     to: toEmail,
     subject: subject,
     html: bodyEmail,
   });
+
+  console.log(info);
 }
 
 export { sendMail };

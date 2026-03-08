@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import { User } from "../database/models/user";
 import { passwordService } from "../auth/password";
 import { jwtService } from "../auth/jwt";
+import { sendMail } from "../services/emails";
+import { generatePasswordResetEmail } from "src/templates/emails";
 
 export class AuthController {
   register = async (req: Request, res: Response): Promise<void> => {
@@ -66,6 +68,11 @@ export class AuthController {
     user.resetPasswordExpires = resetPasswordExpires;
 
     await user.save();
+    await sendMail(
+      user.email,
+      "Recuperação de Senha - AGRI-ARO",
+      generatePasswordResetEmail(user.name, resetToken),
+    );
     res.sendStatus(200);
   };
 
